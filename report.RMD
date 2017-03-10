@@ -1,0 +1,680 @@
+---
+title: "R Shiny Report"
+output: html_document
+---
+
+
+```{r set-options, echo=FALSE, cache=FALSE}
+```
+
+
+### Attributes Summary
+
+***
+```{r ATTR_SUMMARY,fig.width= 16,fig.height= 6, echo= FALSE,warning=FALSE}
+
+K = attr_ranked()
+fit = cluster_fit()
+labelx = labelx()
+    D = rearrange(X = K, labelx, chisq_table())
+Ncol = ncol(D)
+Rows = floor(Ncol/5)
+
+if("Attributes summary" %in% input$reportList){
+    if(Rows>0){
+      for(j in 1:Rows){
+        local({
+          my_i = j
+          
+          name = paste("row",my_i,sep="")
+
+            y = y()
+          
+            for(i in 1:5){
+              index=my_i*5-5+i
+              assign(paste("p",i,sep=""),
+                     barplot_1(D[,index],
+                               y,
+                               names(D)[index],
+                               chisq_test(D[,index],y,nrow(D)*input$chisq_tol),
+                               labelx,
+                               NUM_CLUST_A(),
+                               showbarcolor = input$showbarcolor
+                     )#,envir = globalenv() 
+              )
+            }
+            g = cbind(p1,p2,p3,p4,p5, size="first")
+            g$heights = grid::unit.pmax(p1$heights, p2$heights,p3$heights,p4$heights,p5$heights)
+            grid::grid.newpage()
+            grid::grid.draw(g)
+            
+          
+        })
+      }
+    }
+    Nleft = Ncol%%5
+    eachRow = 5
+    N = NUM_CLUST_A()
+    STATUS = y()
+    
+    if(Nleft>0){
+    pvalues=c()
+    pvalues[(Rows*eachRow+1):(Rows*eachRow+Nleft)] = sapply(1:Nleft, function(i){chisq_test(D[,Rows*eachRow+i],STATUS,floor(nrow(D)*input$chisq_tol))})
+    }
+    
+    p0=ggplot(mtcars, aes(x = wt, y = mpg)) + geom_blank()+theme(
+      panel.background = element_rect(fill = NA), 
+      panel.grid = element_blank(),
+      axis.title=element_blank(),
+      axis.ticks=element_blank(),
+      axis.text=element_blank()
+    )
+    p0 = ggplotGrob(p0)
+    
+    if(Nleft==1){
+      pp1 = barplot_1( D[,Rows*eachRow+1],
+                       STATUS,
+                       names(D)[Rows*eachRow+1],
+                       pvalues[Rows*eachRow+1],
+                       labelx,
+                       N,
+                       showbarcolor = input$showbarcolor)
+      gx = cbind(pp1, p0,p0,p0,p0, size="first")
+      gx$heights = grid::unit.pmax(pp1$heights)
+      
+    }
+    if(Nleft==2){
+      pp1 = barplot_1( D[,Rows*eachRow+1],
+                       STATUS,
+                       names(D)[Rows*eachRow+1],
+                       pvalues[Rows*eachRow+1],
+                       labelx,
+                       N,
+                       showbarcolor = input$showbarcolor)
+      
+      pp2 = barplot_1( D[,Rows*eachRow+2],
+                       STATUS,
+                       names(D)[Rows*eachRow+2],
+                       pvalues[Rows*eachRow+2],
+                       labelx,
+                       N,
+                       showbarcolor = input$showbarcolor)
+      
+      gx = cbind(pp1, pp2,p0,p0,p0, size="first")
+      gx$heights = grid::unit.pmax(pp1$heights,pp2$heights)
+      
+    }
+    if(Nleft==3){
+      pp1 = barplot_1( D[,Rows*eachRow+1],
+                       STATUS,
+                       names(D)[Rows*eachRow+1],
+                       pvalues[Rows*eachRow+1],
+                       labelx,
+                       N,
+                       showbarcolor = input$showbarcolor)
+      
+      pp2 = barplot_1( D[,Rows*eachRow+2],
+                       STATUS,
+                       names(D)[Rows*eachRow+2],
+                       pvalues[Rows*eachRow+2],
+                       labelx,
+                       N,
+                       showbarcolor = input$showbarcolor)
+      
+      pp3 = barplot_1( D[,Rows*eachRow+3],
+                       STATUS,
+                       names(D)[Rows*eachRow+3],
+                       pvalues[Rows*eachRow+3],
+                       labelx,
+                       N,
+                       showbarcolor = input$showbarcolor)  
+      gx = cbind(pp1, pp2,pp3,p0,p0, size="first")
+      gx$heights = grid::unit.pmax(pp1$heights,pp2$heights,pp3$heights)
+      
+    }
+    if(Nleft==4){
+      pp1 = barplot_1( D[,Rows*eachRow+1],
+                       STATUS,
+                       names(D)[Rows*eachRow+1],
+                       pvalues[Rows*eachRow+1],
+                       labelx,
+                       N,
+                       showbarcolor = input$showbarcolor)
+      
+      pp2 = barplot_1( D[,Rows*eachRow+2],
+                       STATUS,
+                       names(D)[Rows*eachRow+2],
+                       pvalues[Rows*eachRow+2],
+                       labelx,
+                       N,
+                       showbarcolor = input$showbarcolor)
+      
+      pp3 = barplot_1( D[,Rows*eachRow+3],
+                       STATUS,
+                       names(D)[Rows*eachRow+3],
+                       pvalues[Rows*eachRow+3],
+                       labelx,
+                       N,
+                       showbarcolor = input$showbarcolor)  
+      pp4 = barplot_1( D[,Rows*eachRow+4],
+                       STATUS,
+                       names(D)[Rows*eachRow+4],
+                       pvalues[Rows*eachRow+4],
+                       labelx,
+                       N,
+                       showbarcolor = input$showbarcolor)  
+      gx = cbind(pp1, pp2,pp3,pp4,p0, size="first")
+      gx$heights = grid::unit.pmax(pp1$heights,pp2$heights,pp3$heights,pp4$height)
+      
+    }
+      grid::grid.newpage()
+      if(Nleft !=0) grid::grid.draw(gx)
+
+
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+***
+### Attributes Clustering Chart
+```{r ATTR_CLUST, echo=FALSE, fig.width= 16 , fig.height= 8,warning=FALSE}
+if("Attributes clustering" %in% input$reportList) {
+      p1 = ggdendrogram(as.dendrogram(fit), rotate=TRUE)
+      df2<-data.frame(cluster=cutree(fit,NUM_CLUST_A()),states=factor(fit$labels,levels=fit$labels[fit$order]))
+      df3<-ddply(df2,.(cluster),summarise,pos=mean(as.numeric(states)))
+      p2 = ggplot(df2,aes(states,y=1,fill=factor(cluster)))+geom_tile()+
+        scale_y_continuous(expand=c(0,0))+
+        theme(axis.title=element_blank(),
+              axis.ticks=element_blank(),
+              axis.text=element_blank(),
+              legend.position="none")+coord_flip()+
+        geom_text(data=df3,aes(x=pos,label=cluster))
+      gp1<-ggplotGrob(p1)
+      gp2<-ggplotGrob(p2)  
+      maxHeight = grid::unit.pmax(gp1$heights[2:5], gp2$heights[2:5])
+      gp1$heights[2:5] <- as.list(maxHeight)
+      gp2$heights[2:5] <- as.list(maxHeight)
+      grid.arrange(gp2, gp1, ncol=2,widths=c(1/6,5/6))
+}
+```
+
+***
+
+### Two way barplot of selected attributes
+
+```{r TWO_WAY, echo=FALSE, fig.width= 16 , fig.height= 8,warning=FALSE}
+if( "Two way barplot" %in% input$reportList      &!is.null(input$factor_1)) {
+        X = if(input$head_or_drive =="HEAD") ATTR() else ATTR_drive()
+        y = y()      
+        x1 = X[,input$factor_1]
+        x2 = X[,input$factor_2]
+        FAIL = y
+        xname1 = input$factor_1
+        xname2 = input$factor_2
+
+      barplot_2(x1,x2,FAIL,xname1,xname2)
+}
+```
+
+***
+
+
+### Attributes with many levels
+
+```{r MANY_LEVELS, echo=FALSE,warning=FALSE, fig.height=6,fig.width=12}
+if( "Attributes with many levels" %in% input$reportList     &!is.null(input$factor_3)) {
+
+    X = attr_many_levels()
+    y = y()
+  
+    xname = input$factor_3
+    
+    x = as.character(X[,xname])
+  
+    p = barplot_1_custom(x,
+                         y,
+                         xname = xname,
+                         chisq_test(x,y,nrow(X)*input$chisq_tol),
+                         L=NULL,
+                         
+                         NUM_CLUST_A()
+                         
+    )
+    
+    grid::grid.newpage()
+    grid::grid.draw(p)
+
+
+
+      X = attr_many_levels()
+      y = y()
+      
+      n = ncol(X)
+      
+      
+      ListFails = function(x,y){
+        D = data.frame(x,y)
+        ddply(D,.(x), function(df) sum(df$y=="F"))$V1
+      }
+      
+      LIST = lapply(X,function(x) ListFails(x,y))
+      
+      max_length = max(sapply(LIST, length))
+      
+      M_1 = lapply(LIST,function(x) c(x,rep("",max_length-length(x))))
+      
+      
+      M_2 = t(data.frame(M_1))
+      colnames(M_2) = paste0(1:ncol(M_2))
+      library(DT)
+      colfunc <- colorRampPalette(c("white", "red"))
+      colors = colfunc(100)
+      
+      datatable(M_2,options =
+                  list(
+                    paging = FALSE,
+                    ordering = FALSE,
+                    filtering = FALSE,
+                    searching =FALSE,
+                    rownames = TRUE
+                   )
+                )%>% 
+        formatStyle(
+          paste0(1:ncol(M_2)),
+          color = styleInterval(seq(0,3,length.out = 99), colors)
+        )
+
+}
+
+
+
+```
+
+***
+
+###Parametrics Summary
+
+```{r PARA_SUMMARY, echo=FALSE,warning=FALSE,out.width=c('300px', '300px','300px')}
+#, fig.show='hold'}
+#fig.width= 16,fig.height= 5,
+if("Parametrics Summary" %in% input$reportList){
+  D = scatterData()
+  D = D[,sample(1:ncol(D))]
+  FAIL = Y()
+  highlight =   (FAIL == "F")
+  
+  color = scatter_color()
+  
+  n_pair = floor(ncol(D)/2)
+  
+  L = list()
+  
+  for ( i in 1:n_pair){
+    x = D[,2*i-1]
+    y = D[,2*i]
+    namex = names(D)[2*i-1]
+    namey = names(D)[2*i]
+    temp = data.frame(x,y)
+    temp2 = Random_Sample_prop(temp,0.1)
+    temp3 = temp[highlight,]
+    
+    xcol = ggplotColours(NUM_CLUST_P())[  color[color[,1]==namex,2]      ]
+    ycol = ggplotColours(NUM_CLUST_P())[  color[color[,1]==namey,2]      ]
+    
+    p = ggplot(data=temp2,aes(x=x,y=y)) +
+      geom_point()+
+      xlab(namex)+ ylab(namey)+
+      geom_point(data=temp3,aes(x=x,y=y),color="red",size=4)+
+      theme(legend.position="none")+
+      theme(axis.title.x=element_text(colour=xcol))+
+      theme(axis.title.y=element_text(colour=ycol))
+    
+    #assign(paste("p",i,sep=""),p)
+    print(p)
+    #L = c(L,list(p))
+  }          
+   # do.call(grid.arrange,c(L,ncol=3))
+  
+}
+```
+
+***
+
+### Parametrics Clustering Chart
+
+```{r PARA_CLUST, echo=FALSE, fig.width= 16 , fig.height= 6,warning=FALSE}
+if("Parametrics clustering" %in% input$reportList){
+      fit = para_clust_fit()
+    p1 = ggdendrogram(as.dendrogram(fit), rotate=TRUE)
+    
+    df2<-data.frame(cluster=cutree(fit,h=0.5),
+                    states=factor(fit$labels,levels=fit$labels[fit$order]))
+    df3<-ddply(df2,.(cluster),summarise,pos=mean(as.numeric(states)))
+    p2 = ggplot(df2,aes(states,y=1,fill=factor(cluster)))+geom_tile()+
+      scale_y_continuous(expand=c(0,0))+
+      theme(axis.title=element_blank(),
+            axis.ticks=element_blank(),
+            axis.text=element_blank(),
+            legend.position="none")+coord_flip()+
+      geom_text(data=df3,aes(x=pos,label=cluster))
+    gp1<-ggplotGrob(p1)
+    gp2<-ggplotGrob(p2)  
+    maxHeight = grid::unit.pmax(gp1$heights[2:5], gp2$heights[2:5])
+    gp1$heights[2:5] <- as.list(maxHeight)
+    gp2$heights[2:5] <- as.list(maxHeight)
+    grid.arrange(gp2, gp1, ncol=2,widths=c(1/6,5/6))
+}
+
+
+```
+
+***
+
+### Custom Scatterplot of selected Parametrics
+
+```{r PARA_CUSTOM, echo=FALSE,fig.width= 16,fig.height= 8,warning=FALSE}
+if("Custom Parametric Plot" %in% input$reportList){
+    FAIL = Y()
+    highlight =   (FAIL == "F")
+    
+    X = para()
+    
+    if(is.null(input$para_scatter_1) & is.null(input$para_scatter_2)){
+      temp = data.frame(x = X[,1], y = X[,2])
+      namex = names(X)[1]
+      namey = names(X)[2]
+    } else {
+      temp = data.frame(x = X[,input$para_scatter_1], y = X[,input$para_scatter_2])
+      namex = input$para_scatter_1
+      namey = input$para_scatter_2
+    }
+    
+    temp2 = Random_Sample_prop(  temp, 1)
+    temp3 = subset(temp,highlight)
+          
+    ggplot(data=temp2,aes(x=x,y=y)) +
+      geom_point(alpha=0.4)+
+#       scale_x_continuous(limit=c(min(x), max(x)), 
+#                          breaks=round(fivenum(x),1))+
+#       scale_y_continuous(limit=c(min(y), max(y)),
+#                          breaks=round(fivenum(y),1)) +    
+      
+      geom_rug(size=0.05) +   
+      #geom_smooth(method=lm) +
+      stat_ellipse(type = "norm",linetype = 2)+
+      xlab(namex)+ ylab(namey)+
+      theme_bw()+
+      geom_point(data=temp3,aes(x=x,y=y),color="red",size=3)+
+  geom_rug(data=temp3,size=0.1,color="red") +   
+      theme(legend.position="none")
+}
+```
+
+
+***
+
+### Interactions Summary
+
+```{r INTER_SUMMARY, echo=FALSE,fig.height=5,fig.width=12}
+if("Interaction summary" %in% input$reportList & input$interaction){
+  N = 50
+  top_n = ifelse(  nrow(Interaction_DF())>N, N, nrow(Interaction_DF()))
+  X = Interaction_DF()[1:top_n,]
+  
+  
+  
+  PARA_UNIQUE = unique(X$PARA)
+  n = length(PARA_UNIQUE)
+  Y = Y()
+
+for(j in 1:n){
+  
+  my_i = j
+  
+  current_PARA = PARA_UNIQUE[my_i]
+  temp = X[X$PARA == current_PARA, ]  
+  m = nrow(temp)   
+  
+  #cat("<div'>")
+  cat(current_PARA)
+ # cat("</div>")
+  
+#  for(i in 1:m){
+  P = lapply(1:m, function(i){
+        attr_name = temp$ATTR[i]
+        
+        para_name = current_PARA
+        
+        attr = ATTR()[, attr_name ]
+        
+        para = para()[, para_name]
+        
+        PlotLogistGroup(attr,para,Y,
+                        attr_name=attr_name,
+                        para_name=para_name,
+                        cutoff = 0.4,hide=1,uselog = input$inter_log) 
+        #print(p)
+        })
+
+  do.call(grid.arrange,c(P,ncol=3))
+  }
+  
+}
+```
+
+***
+
+### Attribute-dominant custom plots
+```{r out.width=c('450px', '450px'), fig.show='hold',echo=FALSE, warning=FALSE}
+#```{r INTER_CUSTOM, echo=FALSE, fig.width= 16,fig.height= 8,warning=FALSE}
+if("Attribute-Dominant Custom plots" %in% input$reportList       &!is.null(input$second_para)){
+  
+    attr = ATTR()[,input$dominant_attr]
+    para = para()[,input$second_para]
+    FAIL = Y()
+    xname1 = input$dominant_attr
+    xname2 = input$second_para
+
+  p = PlotLogistGroup_jitter(attr,para,FAIL,xname1,xname2,0.4,1,uselog = input$dominant_ATTR_log)
+  
+    Group = ATTR()[,input$dominant_attr]
+    y = para()[,input$second_para]
+    
+    xname1 = input$dominant_attr
+    xname2 = input$second_para
+            
+    D = data.frame(Group,y)
+    
+    TT = paste("CDF  ",  xname2  ," by ", xname1 )
+    p2 = ggplot(D, aes(x=y,colour = Group)) + stat_ecdf() +#+ theme(legend.position="none")
+      theme(axis.title.x=element_blank(),axis.title.y=element_blank()) +
+      scale_fill_discrete(name="Group")+
+      ggtitle(TT)+
+      theme(plot.title = element_text(size=15,color="blue"))
+  print(p)
+  print(p2)
+  
+}
+```
+
+***
+
+### Attribute-dominant Rank
+```{r out.width=c('450px', '450px'), fig.show='hold',echo=FALSE, warning=FALSE}
+#```{r INTER_CUSTOM, echo=FALSE, fig.width= 16,fig.height= 8,warning=FALSE}
+if("Attribute-Dominant Rank" %in% input$reportList){
+
+  N = min(10,ncol(SECOND_PARAS()),na.rm = TRUE)
+
+        # boxplot
+        for(j in 1:N){
+          my_i = j
+          
+          x = as.character(RAW()[,input$dominant_attr])
+          y = SECOND_PARAS()[,my_i]
+          
+          
+          D = data.frame(x,y)
+          
+          pvalue = tryCatch({
+            fit = aov(y ~ x)
+            summary(fit)[[1]][[1,"Pr(>F)"]]
+          }, error = function(e){
+            1
+          })
+          
+          TT = paste(names(SECOND_PARAS())[my_i],"    ANOVA p-value:",round(pvalue,3),sep=" ")
+          
+          p = ggplot(D, aes(factor(x), y))+geom_boxplot()+geom_jitter()+
+              xlab(input$box_attr) + ggtitle(TT)+
+              theme(plot.title = element_text(size=15,color="blue"),
+                    axis.title.y=element_blank(),
+                    axis.text.x = element_text(angle = 90, hjust = 0)
+              )
+                      if (input$dominant_ATTR_log){
+                        #p = p + scale_y_continuous(trans = log_trans())
+                        p = p + scale_y_log10()
+                      }
+          
+        #cdf
+        
+          Group = as.character(RAW()[,input$dominant_attr])
+          y = SECOND_PARAS()[,my_i]
+          
+          D = data.frame(Group,y)
+          
+          TT = paste("CDF  ",  names(SECOND_PARAS())[my_i]  ," by ",input$dominant_attr )
+                    
+          p2 = ggplot(D, aes(x=y,colour = Group)) + stat_ecdf() +#+ theme(legend.position="none")
+              theme(axis.title.x=element_blank(),axis.title.y=element_blank()) +
+              scale_fill_discrete(name="Group")+
+              ggtitle(TT)+
+              theme(plot.title = element_text(size=15,color="blue"))
+        
+        print(p)
+        print(p2)
+      }
+  
+  
+}
+```
+
+
+***
+
+
+### Parametric-dominant custom plots
+
+```{r out.width=c('450px', '450px'), fig.show='hold',echo=FALSE, warning=FALSE}
+#```{r INTER_ALL, echo=FALSE, fig.width= 16,fig.height= 8}
+if("Parametric-Dominant Custom plots" %in% input$reportList          &!is.null(input$second_attr)){
+
+    attr = ATTR()[,input$second_attr]
+    para = para()[,input$dominant_para]
+    FAIL = Y()
+    xname1 = input$second_attr
+    xname2 = input$dominant_para
+    
+    p = PlotLogistGroup_jitter(attr,para,FAIL,xname1,xname2,0.4,1,uselog = input$dominant_PARA_log)
+
+    
+    Group = ATTR()[,input$second_attr]
+    y = para()[,input$dominant_para]
+    
+    xname1 = input$second_attr
+    xname2 = input$dominant_para
+    
+    D = data.frame(Group,y)
+    
+    TT = paste("CDF  ",  xname2  ," by ", xname1 )
+    p2 = 
+      ggplot(D, aes(x=y,colour = Group)) + stat_ecdf() +#+ theme(legend.position="none")
+      theme(axis.title.x=element_blank(),axis.title.y=element_blank()) +
+      scale_fill_discrete(name="Group")+
+      ggtitle(TT)+
+      theme(plot.title = element_text(size=15,color="blue"))
+    print(p)
+    print(p2)
+}
+
+```
+
+***
+
+
+### Parametric-dominant rank
+
+```{r out.width=c('450px', '450px'), fig.show='hold',echo=FALSE, warning=FALSE}
+#```{r INTER_ALL, echo=FALSE, fig.width= 16,fig.height= 8}
+if("Parametric-Dominant Rank" %in% input$reportList){
+
+    N = min(10,ncol(SECOND_ATTRS()),na.rm = TRUE)
+    
+        for(j in 1:N){
+          my_i = j
+          
+
+          #boxplot
+          x = SECOND_ATTRS()[,my_i]
+          y = RAW()[,input$dominant_para]
+          
+          
+          D = data.frame(x,y)
+          
+
+          pvalue = tryCatch({
+            fit = aov(y ~ x)
+            summary(fit)[[1]][[1,"Pr(>F)"]]
+          }, error = function(e){
+            1
+          })
+          
+          TT = paste(names(SECOND_ATTRS())[my_i],"    ANOVA p-value:",round(pvalue,3),sep=" ")
+          
+            p = ggplot(D, aes(factor(x), y))+geom_boxplot()+geom_jitter()+
+              xlab(input$box_attr) + ggtitle(TT)+
+              theme(plot.title = element_text(size=15,color="blue"),
+                    axis.title.y=element_blank(),
+                    axis.text.x = element_text(angle = 90, hjust = 0)
+              )
+                      if (input$dominant_PARA_log){
+                        #p = p + scale_y_continuous(trans = log_trans())
+                        p = p + scale_y_log10()
+                      }
+          #cdf
+          
+          Group = SECOND_ATTRS()[,my_i]
+          y = RAW()[,input$dominant_para]
+          
+          D = data.frame(Group,y)
+          
+          
+          TT = paste("CDF  ",  names(SECOND_ATTRS())[my_i]  ," by ",input$dominant_para )
+          
+          p2 = ggplot(D, aes(x=y,colour = Group)) + stat_ecdf() +#+ theme(legend.position="none")
+              theme(axis.title.x=element_blank(),axis.title.y=element_blank()) +
+              scale_fill_discrete(name="Group")+
+              ggtitle(TT)+
+              theme(plot.title = element_text(size=15,color="blue"))
+
+          print(p)
+          print(p2)
+      }
+}
+
+```
+
+
+Contact:ning.h.he@seagate.com
