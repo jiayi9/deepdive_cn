@@ -186,7 +186,7 @@ server <- function(input, session,output) {
   source("FUNCTIONS.R",local = TRUE)
   source("www/chooser.R", local = TRUE)
   
-  source("control.R", local = TRUE)#,encoding = "utf-8")
+ # source("control.R", local = TRUE)#,encoding = "utf-8")
   source("values.R",local = TRUE)
   
   
