@@ -168,7 +168,7 @@ ui <- fluidPage(
                ,tabPanel("数据探索",icon = icon("cube"),
                          p(""),
                          br(),br(),br(),
-                         radioButtons("pivot_level","探索以下数据",inline = TRUE,selected = 2,
+                         radioButtons("pivot_level","探索以下数据",inline = TRUE,selected = "raw uploaded",
 #                                       choices = c("原始数据" = 2,
 #                                                   "处理过的行级别数据"=0,
 #                                                   "处理过的聚集级别数据"=1
