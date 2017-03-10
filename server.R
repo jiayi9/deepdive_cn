@@ -1025,14 +1025,14 @@ output$pivot = renderRpivotTable({
     
 
     
-    if(input$pivot_level == "处理过的行级别数据") {
+    if(input$pivot_level == "row level data") {
       D = data.frame(
         DRIVE_SERIAL_NUM = DSN(),
         STATUS = Y(),
         ATTR(),
         PARA()
       )
-    } else if(input$pivot_level == "处理过的聚集级别数据"){
+    } else if(input$pivot_level == "aggregate level data"){
       D = data.frame(
         DRIVE_SERIAL_NUM = DSN_drive(),
         STATUS = Y_drive(),

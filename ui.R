@@ -173,9 +173,9 @@ ui <- fluidPage(
 #                                                   "处理过的行级别数据"=0,
 #                                                   "处理过的聚集级别数据"=1
 #                                                   )
-                                      choices = c("原始数据",
-                                                  "处理过的行级别数据",
-                                                  "处理过的聚集级别数据"
+                                      choices = c("raw uploaded",
+                                                  "row level data",
+                                                  "aggregate level data"
                                       )
                                       
                          ),
